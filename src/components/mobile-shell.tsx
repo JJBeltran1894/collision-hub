@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { to: "/app" as const, label: "Patio", icon: CarFront, exact: true },
-  { to: "/app/kanban" as const, label: "Flujo", icon: ClipboardList, exact: false },
-  { to: "/app/ingreso" as const, label: "Ingreso", icon: PlusCircle, exact: false },
-  { to: "/app/perfil" as const, label: "Perfil", icon: CircleUser, exact: false },
+  { section: null, label: "Patio", icon: CarFront },
+  { section: "kanban", label: "Flujo", icon: ClipboardList },
+  { section: "ingreso", label: "Ingreso", icon: PlusCircle },
+  { section: "perfil", label: "Perfil", icon: CircleUser },
 ];
 
 export function MobileShell({ children }: { children: ReactNode }) {
@@ -20,11 +20,17 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
         <nav className="sticky bottom-0 grid grid-cols-4 border-t border-border bg-yard-bg">
           {TABS.map((tab) => {
-            const active = tab.exact ? pathname === tab.to : pathname.startsWith(tab.to);
+            const href = tab.section ? `/app/${tab.section}` : "/app";
+            const active = pathname === href;
+            const linkProps = tab.section
+              ? tab.section === "kanban"
+                ? ({ to: "/app/kanban" } as const)
+                : ({ to: "/app/$section", params: { section: tab.section } } as const)
+              : ({ to: "/app" } as const);
             return (
               <Link
-                key={tab.to}
-                to={tab.to}
+                key={tab.label}
+                {...linkProps}
                 className={cn(
                   "flex min-h-[56px] flex-col items-center justify-center gap-1 text-[12px] font-bold transition-colors",
                   active ? "text-accent-blue" : "text-muted-grey",

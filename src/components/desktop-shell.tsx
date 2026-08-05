@@ -16,13 +16,13 @@ import { cn } from "@/lib/utils";
 import { useSimulation } from "@/context/simulation";
 
 const NAV = [
-  { to: "/app" as const, label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/app/kanban" as const, label: "Kanban de Flujo", icon: KanbanSquare, exact: false },
-  { to: "/app/proformas" as const, label: "Proformas", icon: FileSpreadsheet, exact: false },
-  { to: "/app/seguros" as const, label: "Ajustes de Seguro", icon: ShieldCheck, exact: false },
-  { to: "/app/repuestos" as const, label: "Repuestos", icon: PackageSearch, exact: false },
-  { to: "/app/facturacion" as const, label: "Facturación", icon: ReceiptText, exact: false },
-  { to: "/app/reportes" as const, label: "Reportes", icon: BarChart3, exact: false },
+  { section: null, label: "Dashboard", icon: LayoutDashboard },
+  { section: "kanban", label: "Kanban de Flujo", icon: KanbanSquare },
+  { section: "proformas", label: "Proformas", icon: FileSpreadsheet },
+  { section: "seguros", label: "Ajustes de Seguro", icon: ShieldCheck },
+  { section: "repuestos", label: "Repuestos", icon: PackageSearch },
+  { section: "facturacion", label: "Facturación", icon: ReceiptText },
+  { section: "reportes", label: "Reportes", icon: BarChart3 },
 ];
 
 export function DesktopShell({ children }: { children: ReactNode }) {
@@ -58,11 +58,17 @@ export function DesktopShell({ children }: { children: ReactNode }) {
 
         <nav className="flex-1 space-y-1 p-2">
           {NAV.map((item) => {
-            const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
+            const href = item.section ? `/app/${item.section}` : "/app";
+            const active = pathname === href;
+            const linkProps = item.section
+              ? item.section === "kanban"
+                ? ({ to: "/app/kanban" } as const)
+                : ({ to: "/app/$section", params: { section: item.section } } as const)
+              : ({ to: "/app" } as const);
             return (
               <Link
-                key={item.to}
-                to={item.to}
+                key={item.label}
+                {...linkProps}
                 title={item.label}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-[12px] transition-colors",
