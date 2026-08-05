@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useSimulation } from "@/context/simulation";
 
-const NAV = [
+const NAV: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/app/kanban", label: "Kanban de Flujo", icon: KanbanSquare },
   { to: "/app/proformas", label: "Proformas", icon: FileSpreadsheet },
@@ -23,7 +23,7 @@ const NAV = [
   { to: "/app/repuestos", label: "Repuestos", icon: PackageSearch },
   { to: "/app/facturacion", label: "Facturación", icon: ReceiptText },
   { to: "/app/reportes", label: "Reportes", icon: BarChart3 },
-] as const;
+];
 
 export function DesktopShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
