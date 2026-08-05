@@ -35,4 +35,4 @@ Los datos son de demostración (mock en el front). No se conecta base de datos e
 
 ## Siguientes pasos sugeridos (no incluidos)
 
-Persistencia real con Lovable Cloud, autenticación con roles en base de datos y aislamiento por sucursal con RLS.
+Autenticación con roles en base de datos y aislamiento por sucursal con RLS.
