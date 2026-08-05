@@ -156,7 +156,7 @@ export const STALLED_THRESHOLD_DAYS = 15;
 
 export const isStalled = (c: VehicleCase) => c.daysInStage > STALLED_THRESHOLD_DAYS;
 
-export const stageOf = (key: StageKey) => STAGES.find((s) => s.key === key) ?? STAGES[0];
+export const stageOf = (key: StageKey) => STAGES.find((s) => s.key === key) ?? STAGES[0]!;
 
 export const casesForBranch = (branch: Branch) => CASES.filter((c) => c.branch === branch);
 
