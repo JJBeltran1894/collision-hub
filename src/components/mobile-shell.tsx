@@ -25,7 +25,9 @@ export function MobileShell({ children }: { children: ReactNode }) {
             const linkProps = tab.section
               ? tab.section === "kanban"
                 ? ({ to: "/app/kanban" } as const)
-                : ({ to: "/app/$section", params: { section: tab.section } } as const)
+                : tab.section === "ingreso"
+                  ? ({ to: "/app/ingreso" } as const)
+                  : ({ to: "/app/$section", params: { section: tab.section } } as const)
               : ({ to: "/app" } as const);
             return (
               <Link

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppSectionRouteImport } from './routes/app.$section'
+import { Route as AppIngresoRouteImport } from './routes/app.ingreso'
 import { Route as AppKanbanRouteImport } from './routes/app.kanban'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const AppSectionRoute = AppSectionRouteImport.update({
   path: '/$section',
   getParentRoute: () => AppRoute,
 } as any)
+const AppIngresoRoute = AppIngresoRouteImport.update({
+  id: '/ingreso',
+  path: '/ingreso',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppKanbanRoute = AppKanbanRouteImport.update({
   id: '/kanban',
   path: '/kanban',
@@ -45,12 +51,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/$section': typeof AppSectionRoute
+  '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app/$section': typeof AppSectionRoute
+  '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
   '/app': typeof AppIndexRoute
 }
@@ -59,15 +67,24 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/$section': typeof AppSectionRoute
+  '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/app/$section' | '/app/kanban' | '/app/'
+  fullPaths:
+    '/' | '/app' | '/app/$section' | '/app/ingreso' | '/app/kanban' | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app/$section' | '/app/kanban' | '/app'
-  id: '__root__' | '/' | '/app' | '/app/$section' | '/app/kanban' | '/app/'
+  to: '/' | '/app/$section' | '/app/ingreso' | '/app/kanban' | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/app/$section'
+    | '/app/ingreso'
+    | '/app/kanban'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -105,6 +122,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSectionRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/ingreso': {
+      id: '/app/ingreso'
+      path: '/ingreso'
+      fullPath: '/app/ingreso'
+      preLoaderRoute: typeof AppIngresoRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/kanban': {
       id: '/app/kanban'
       path: '/kanban'
@@ -117,12 +141,14 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppSectionRoute: typeof AppSectionRoute
+  AppIngresoRoute: typeof AppIngresoRoute
   AppKanbanRoute: typeof AppKanbanRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppSectionRoute: AppSectionRoute,
+  AppIngresoRoute: AppIngresoRoute,
   AppKanbanRoute: AppKanbanRoute,
   AppIndexRoute: AppIndexRoute,
 }
