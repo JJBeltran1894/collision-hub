@@ -127,5 +127,6 @@ function AppLayout() {
       )}
     </div>
     </SyncQueueProvider>
+    </CasesProvider>
   );
 }
