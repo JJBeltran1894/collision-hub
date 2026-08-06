@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { KanbanBoard, CaseCard } from "@/components/kanban";
 import { useSimulation } from "@/context/simulation";
-import { casesForBranch, STAGES } from "@/data/cases";
+import { useCases } from "@/context/cases";
+import { STAGES } from "@/data/cases";
 
 export const Route = createFileRoute("/app/kanban")({
   head: () => ({
