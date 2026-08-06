@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/table";
 import { useSimulation } from "@/context/simulation";
 import { CaseCard } from "@/components/kanban";
-import { casesForBranch, isStalled, money, stageOf } from "@/data/cases";
+import { isCommercialAlert, isStalled, money, stageOf } from "@/data/cases";
+import { useCases } from "@/context/cases";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/")({
@@ -38,9 +39,10 @@ export const Route = createFileRoute("/app/")({
 
 function AppHome() {
   const { session, viewMode } = useSimulation();
+  const { cases } = useCases();
   if (!session) return null;
 
-  const items = casesForBranch(session.branch);
+  const items = cases.filter((c) => c.branch === session.branch);
   const stalled = items.filter(isStalled);
   const insurance = items.filter((i) => i.stage === "ajuste");
   const total = items.reduce((sum, i) => sum + i.amount, 0);
@@ -138,7 +140,14 @@ function AppHome() {
                     <TableCell className="text-[12px]">{stage.label}</TableCell>
                     <TableCell className="text-[12px]">
                       {isStalled(item) ? (
-                        <Badge className="bg-crimson text-[11px] font-bold text-crimson-foreground">
+                        <Badge
+                          className={cn(
+                            "text-[11px] font-bold",
+                            isCommercialAlert(item)
+                              ? "bg-crimson text-crimson-foreground"
+                              : "bg-warning text-warning-foreground",
+                          )}
+                        >
                           {item.daysInStage}
                         </Badge>
                       ) : (

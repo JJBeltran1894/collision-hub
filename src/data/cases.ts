@@ -4,7 +4,9 @@ export type StageKey =
   | "recepcion"
   | "proforma"
   | "ajuste"
-  | "reparacion"
+  | "orden"
+  | "enderezado"
+  | "pintura"
   | "repuestos"
   | "salida";
 
@@ -15,12 +17,14 @@ export type Stage = {
 };
 
 export const STAGES: Stage[] = [
-  { key: "recepcion", label: "Recepción / Ingreso", tone: "muted-grey" },
-  { key: "proforma", label: "Proforma Libre", tone: "accent-blue" },
-  { key: "ajuste", label: "Ajuste de Seguro", tone: "insurance" },
-  { key: "reparacion", label: "Enderezado / Pintura", tone: "slate-deep" },
+  { key: "recepcion", label: "Recepción", tone: "muted-grey" },
+  { key: "proforma", label: "Proforma", tone: "accent-blue" },
+  { key: "ajuste", label: "Ajuste del Seguro", tone: "insurance" },
+  { key: "orden", label: "Orden de Reparación", tone: "accent-blue" },
+  { key: "enderezado", label: "Enderezado", tone: "slate-deep" },
+  { key: "pintura", label: "Pintura", tone: "slate-deep" },
   { key: "repuestos", label: "Espera de Repuestos", tone: "warning" },
-  { key: "salida", label: "Salida", tone: "success" },
+  { key: "salida", label: "Listo / Salida", tone: "success" },
 ];
 
 export const STAGE_STYLES: Record<Stage["tone"], { border: string; dot: string; text: string }> = {
@@ -40,6 +44,13 @@ export const STAGE_STYLES: Record<Stage["tone"], { border: string; dot: string; 
   success: { border: "border-l-success", dot: "bg-success", text: "text-success" },
 };
 
+/** Bitácora de tiempos: una entrada por etapa recorrida. */
+export type StageLogEntry = {
+  stage: StageKey;
+  startedAt: string;
+  endedAt: string | null;
+};
+
 export type VehicleCase = {
   id: string;
   plate: string;
@@ -51,9 +62,35 @@ export type VehicleCase = {
   amount: number;
   advisor: string;
   branch: Branch;
+  history: StageLogEntry[];
 };
 
-export const CASES: VehicleCase[] = [
+const DAY = 86_400_000;
+
+export const daysAgo = (days: number) => new Date(Date.now() - days * DAY).toISOString();
+
+export const daysBetween = (from: string, to: string | null) =>
+  Math.max(0, Math.floor(((to ? new Date(to) : new Date()).getTime() - new Date(from).getTime()) / DAY));
+
+/** Construye una bitácora sintética a partir de las etapas ya recorridas. */
+function buildHistory(stage: StageKey, daysInStage: number, previous: number[] = []): StageLogEntry[] {
+  const index = STAGES.findIndex((s) => s.key === stage);
+  const past = STAGES.slice(0, index);
+  const entries: StageLogEntry[] = [];
+  let offset = daysInStage;
+  for (let i = past.length - 1; i >= 0; i -= 1) {
+    const duration = previous[i] ?? 3;
+    const endedAt = daysAgo(offset);
+    offset += duration;
+    entries.unshift({ stage: past[i]!.key, startedAt: daysAgo(offset), endedAt });
+  }
+  entries.push({ stage, startedAt: daysAgo(daysInStage), endedAt: null });
+  return entries;
+}
+
+type Seed = Omit<VehicleCase, "history"> & { previous?: number[] };
+
+const SEEDS: Seed[] = [
   {
     id: "OT-2418",
     plate: "PCV-4821",
@@ -85,10 +122,11 @@ export const CASES: VehicleCase[] = [
     client: "Comercial Andina S.A.",
     insurer: "Seguros Alianza",
     stage: "ajuste",
-    daysInStage: 17,
+    daysInStage: 118,
     amount: 7420.35,
     advisor: "Karla Mendoza",
     branch: "Quito Norte",
+    previous: [3, 9],
   },
   {
     id: "OT-2421",
@@ -96,7 +134,7 @@ export const CASES: VehicleCase[] = [
     vehicle: "Mazda 3 2020",
     client: "Jorge Salgado",
     insurer: "Equinoccial",
-    stage: "reparacion",
+    stage: "enderezado",
     daysInStage: 6,
     amount: 2560.0,
     advisor: "Karla Mendoza",
@@ -133,10 +171,11 @@ export const CASES: VehicleCase[] = [
     client: "Silvia Cabrera",
     insurer: "Equinoccial",
     stage: "proforma",
-    daysInStage: 3,
+    daysInStage: 46,
     amount: 1710.2,
     advisor: "Luis Paredes",
     branch: "Quito Norte",
+    previous: [4],
   },
   {
     id: "OT-2425",
@@ -144,17 +183,40 @@ export const CASES: VehicleCase[] = [
     vehicle: "Ford Ranger 2020",
     client: "Transporte Litoral Cía.",
     insurer: "Seguros Alianza",
-    stage: "reparacion",
+    stage: "pintura",
     daysInStage: 16,
     amount: 8890.0,
     advisor: "Karla Mendoza",
     branch: "Guayaquil",
   },
+  {
+    id: "OT-2426",
+    plate: "PGT-4409",
+    vehicle: "Suzuki Vitara 2022",
+    client: "Lucía Herrera",
+    insurer: "Equinoccial",
+    stage: "orden",
+    daysInStage: 5,
+    amount: 3320.4,
+    advisor: "Luis Paredes",
+    branch: "Quito Sur",
+  },
 ];
 
+export const CASES: VehicleCase[] = SEEDS.map(({ previous, ...seed }) => ({
+  ...seed,
+  history: buildHistory(seed.stage, seed.daysInStage, previous),
+}));
+
 export const STALLED_THRESHOLD_DAYS = 15;
+/** Alerta comercial: más de 30 días en proforma o ajuste de seguro. */
+export const COMMERCIAL_ALERT_DAYS = 30;
+export const COMMERCIAL_ALERT_STAGES: StageKey[] = ["proforma", "ajuste"];
 
 export const isStalled = (c: VehicleCase) => c.daysInStage > STALLED_THRESHOLD_DAYS;
+
+export const isCommercialAlert = (c: VehicleCase) =>
+  COMMERCIAL_ALERT_STAGES.includes(c.stage) && c.daysInStage > COMMERCIAL_ALERT_DAYS;
 
 export const stageOf = (key: StageKey) => STAGES.find((s) => s.key === key) ?? STAGES[0]!;
 
@@ -162,3 +224,8 @@ export const casesForBranch = (branch: Branch) => CASES.filter((c) => c.branch =
 
 export const money = (value: number) =>
   new Intl.NumberFormat("es-EC", { style: "currency", currency: "USD" }).format(value);
+
+export const formatDate = (iso: string) =>
+  new Intl.DateTimeFormat("es-EC", { day: "2-digit", month: "short", year: "numeric" }).format(
+    new Date(iso),
+  );

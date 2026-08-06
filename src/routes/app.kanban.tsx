@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { KanbanBoard, CaseCard } from "@/components/kanban";
 import { useSimulation } from "@/context/simulation";
-import { casesForBranch, STAGES } from "@/data/cases";
+import { useCases } from "@/context/cases";
+import { STAGES } from "@/data/cases";
 
 export const Route = createFileRoute("/app/kanban")({
   head: () => ({
@@ -26,8 +27,9 @@ export const Route = createFileRoute("/app/kanban")({
 
 function KanbanPage() {
   const { session, viewMode } = useSimulation();
+  const { cases } = useCases();
   if (!session) return null;
-  const items = casesForBranch(session.branch);
+  const items = cases.filter((c) => c.branch === session.branch);
 
   if (viewMode === "mobile") {
     return (
@@ -45,7 +47,7 @@ function KanbanPage() {
                 {stage.label} ({column.length})
               </h2>
               {column.map((item) => (
-                <CaseCard key={item.id} item={item} />
+                <CaseCard key={item.id} item={item} showMoveSelect />
               ))}
             </section>
           );
