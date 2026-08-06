@@ -27,8 +27,9 @@ export const Route = createFileRoute("/app/kanban")({
 
 function KanbanPage() {
   const { session, viewMode } = useSimulation();
+  const { cases } = useCases();
   if (!session) return null;
-  const items = casesForBranch(session.branch);
+  const items = cases.filter((c) => c.branch === session.branch);
 
   if (viewMode === "mobile") {
     return (
