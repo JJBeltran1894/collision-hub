@@ -60,11 +60,15 @@ export function DesktopShell({ children }: { children: ReactNode }) {
           {NAV.map((item) => {
             const href = item.section ? `/app/${item.section}` : "/app";
             const active = pathname === href;
-            const linkProps = item.section
-              ? item.section === "kanban"
+            const linkProps = !item.section
+              ? ({ to: "/app" } as const)
+              : item.section === "kanban"
                 ? ({ to: "/app/kanban" } as const)
-                : ({ to: "/app/$section", params: { section: item.section } } as const)
-              : ({ to: "/app" } as const);
+                : item.section === "proformas"
+                  ? ({ to: "/app/proformas" } as const)
+                  : item.section === "seguros"
+                    ? ({ to: "/app/seguros" } as const)
+                    : ({ to: "/app/$section", params: { section: item.section } } as const);
             return (
               <Link
                 key={item.label}

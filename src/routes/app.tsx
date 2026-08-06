@@ -8,6 +8,7 @@ import { DesktopShell } from "@/components/desktop-shell";
 import { MobileShell } from "@/components/mobile-shell";
 import { SyncQueueProvider } from "@/context/sync-queue";
 import { CasesProvider } from "@/context/cases";
+import { ProformaProvider } from "@/context/proformas";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -50,6 +51,7 @@ function AppLayout() {
 
   return (
     <CasesProvider>
+    <ProformaProvider>
     <SyncQueueProvider>
     <div className="min-h-screen bg-office-bg">
       <header className="sticky top-0 z-30 flex h-14 items-center gap-3 bg-slate-deep px-3 text-slate-deep-foreground md:px-4">
@@ -127,6 +129,7 @@ function AppLayout() {
       )}
     </div>
     </SyncQueueProvider>
+    </ProformaProvider>
     </CasesProvider>
   );
 }

@@ -15,6 +15,8 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppSectionRouteImport } from './routes/app.$section'
 import { Route as AppIngresoRouteImport } from './routes/app.ingreso'
 import { Route as AppKanbanRouteImport } from './routes/app.kanban'
+import { Route as AppProformasRouteImport } from './routes/app.proformas'
+import { Route as AppSegurosRouteImport } from './routes/app.seguros'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +48,16 @@ const AppKanbanRoute = AppKanbanRouteImport.update({
   path: '/kanban',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProformasRoute = AppProformasRouteImport.update({
+  id: '/proformas',
+  path: '/proformas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSegurosRoute = AppSegurosRouteImport.update({
+  id: '/seguros',
+  path: '/seguros',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,6 +65,8 @@ export interface FileRoutesByFullPath {
   '/app/$section': typeof AppSectionRoute
   '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
+  '/app/proformas': typeof AppProformasRoute
+  '/app/seguros': typeof AppSegurosRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -60,6 +74,8 @@ export interface FileRoutesByTo {
   '/app/$section': typeof AppSectionRoute
   '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
+  '/app/proformas': typeof AppProformasRoute
+  '/app/seguros': typeof AppSegurosRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -69,14 +85,30 @@ export interface FileRoutesById {
   '/app/$section': typeof AppSectionRoute
   '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
+  '/app/proformas': typeof AppProformasRoute
+  '/app/seguros': typeof AppSegurosRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/app' | '/app/$section' | '/app/ingreso' | '/app/kanban' | '/app/'
+    | '/'
+    | '/app'
+    | '/app/$section'
+    | '/app/ingreso'
+    | '/app/kanban'
+    | '/app/proformas'
+    | '/app/seguros'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app/$section' | '/app/ingreso' | '/app/kanban' | '/app'
+  to:
+    | '/'
+    | '/app/$section'
+    | '/app/ingreso'
+    | '/app/kanban'
+    | '/app/proformas'
+    | '/app/seguros'
+    | '/app'
   id:
     | '__root__'
     | '/'
@@ -84,6 +116,8 @@ export interface FileRouteTypes {
     | '/app/$section'
     | '/app/ingreso'
     | '/app/kanban'
+    | '/app/proformas'
+    | '/app/seguros'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
@@ -136,6 +170,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppKanbanRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/proformas': {
+      id: '/app/proformas'
+      path: '/proformas'
+      fullPath: '/app/proformas'
+      preLoaderRoute: typeof AppProformasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/seguros': {
+      id: '/app/seguros'
+      path: '/seguros'
+      fullPath: '/app/seguros'
+      preLoaderRoute: typeof AppSegurosRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -143,6 +191,8 @@ interface AppRouteChildren {
   AppSectionRoute: typeof AppSectionRoute
   AppIngresoRoute: typeof AppIngresoRoute
   AppKanbanRoute: typeof AppKanbanRoute
+  AppProformasRoute: typeof AppProformasRoute
+  AppSegurosRoute: typeof AppSegurosRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -150,6 +200,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppSectionRoute: AppSectionRoute,
   AppIngresoRoute: AppIngresoRoute,
   AppKanbanRoute: AppKanbanRoute,
+  AppProformasRoute: AppProformasRoute,
+  AppSegurosRoute: AppSegurosRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
