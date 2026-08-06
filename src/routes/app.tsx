@@ -7,6 +7,7 @@ import { useSimulation } from "@/context/simulation";
 import { DesktopShell } from "@/components/desktop-shell";
 import { MobileShell } from "@/components/mobile-shell";
 import { SyncQueueProvider } from "@/context/sync-queue";
+import { CasesProvider } from "@/context/cases";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
