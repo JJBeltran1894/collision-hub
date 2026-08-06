@@ -16,6 +16,7 @@ import { Route as AppSectionRouteImport } from './routes/app.$section'
 import { Route as AppIngresoRouteImport } from './routes/app.ingreso'
 import { Route as AppKanbanRouteImport } from './routes/app.kanban'
 import { Route as AppProformasRouteImport } from './routes/app.proformas'
+import { Route as AppSegurosRouteImport } from './routes/app.seguros'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const AppProformasRoute = AppProformasRouteImport.update({
   path: '/proformas',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSegurosRoute = AppSegurosRouteImport.update({
+  id: '/seguros',
+  path: '/seguros',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
   '/app/proformas': typeof AppProformasRoute
+  '/app/seguros': typeof AppSegurosRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
   '/app/proformas': typeof AppProformasRoute
+  '/app/seguros': typeof AppSegurosRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
   '/app/proformas': typeof AppProformasRoute
+  '/app/seguros': typeof AppSegurosRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/app/ingreso'
     | '/app/kanban'
     | '/app/proformas'
+    | '/app/seguros'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/app/ingreso'
     | '/app/kanban'
     | '/app/proformas'
+    | '/app/seguros'
     | '/app'
   id:
     | '__root__'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/app/ingreso'
     | '/app/kanban'
     | '/app/proformas'
+    | '/app/seguros'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
@@ -165,6 +177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProformasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/seguros': {
+      id: '/app/seguros'
+      path: '/seguros'
+      fullPath: '/app/seguros'
+      preLoaderRoute: typeof AppSegurosRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -173,6 +192,7 @@ interface AppRouteChildren {
   AppIngresoRoute: typeof AppIngresoRoute
   AppKanbanRoute: typeof AppKanbanRoute
   AppProformasRoute: typeof AppProformasRoute
+  AppSegurosRoute: typeof AppSegurosRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -181,6 +201,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIngresoRoute: AppIngresoRoute,
   AppKanbanRoute: AppKanbanRoute,
   AppProformasRoute: AppProformasRoute,
+  AppSegurosRoute: AppSegurosRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
