@@ -47,7 +47,7 @@ function KanbanPage() {
                 {stage.label} ({column.length})
               </h2>
               {column.map((item) => (
-                <CaseCard key={item.id} item={item} />
+                <CaseCard key={item.id} item={item} showMoveSelect />
               ))}
             </section>
           );
