@@ -49,6 +49,7 @@ function AppLayout() {
   }
 
   return (
+    <CasesProvider>
     <SyncQueueProvider>
     <div className="min-h-screen bg-office-bg">
       <header className="sticky top-0 z-30 flex h-14 items-center gap-3 bg-slate-deep px-3 text-slate-deep-foreground md:px-4">
