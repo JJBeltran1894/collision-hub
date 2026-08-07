@@ -13,9 +13,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppSectionRouteImport } from './routes/app.$section'
+import { Route as AppFacturacionRouteImport } from './routes/app.facturacion'
 import { Route as AppIngresoRouteImport } from './routes/app.ingreso'
 import { Route as AppKanbanRouteImport } from './routes/app.kanban'
 import { Route as AppProformasRouteImport } from './routes/app.proformas'
+import { Route as AppRepuestosRouteImport } from './routes/app.repuestos'
 import { Route as AppSegurosRouteImport } from './routes/app.seguros'
 
 const IndexRoute = IndexRouteImport.update({
@@ -38,6 +40,11 @@ const AppSectionRoute = AppSectionRouteImport.update({
   path: '/$section',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFacturacionRoute = AppFacturacionRouteImport.update({
+  id: '/facturacion',
+  path: '/facturacion',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppIngresoRoute = AppIngresoRouteImport.update({
   id: '/ingreso',
   path: '/ingreso',
@@ -53,6 +60,11 @@ const AppProformasRoute = AppProformasRouteImport.update({
   path: '/proformas',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRepuestosRoute = AppRepuestosRouteImport.update({
+  id: '/repuestos',
+  path: '/repuestos',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSegurosRoute = AppSegurosRouteImport.update({
   id: '/seguros',
   path: '/seguros',
@@ -63,18 +75,22 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/$section': typeof AppSectionRoute
+  '/app/facturacion': typeof AppFacturacionRoute
   '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
   '/app/proformas': typeof AppProformasRoute
+  '/app/repuestos': typeof AppRepuestosRoute
   '/app/seguros': typeof AppSegurosRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app/$section': typeof AppSectionRoute
+  '/app/facturacion': typeof AppFacturacionRoute
   '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
   '/app/proformas': typeof AppProformasRoute
+  '/app/repuestos': typeof AppRepuestosRoute
   '/app/seguros': typeof AppSegurosRoute
   '/app': typeof AppIndexRoute
 }
@@ -83,9 +99,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/$section': typeof AppSectionRoute
+  '/app/facturacion': typeof AppFacturacionRoute
   '/app/ingreso': typeof AppIngresoRoute
   '/app/kanban': typeof AppKanbanRoute
   '/app/proformas': typeof AppProformasRoute
+  '/app/repuestos': typeof AppRepuestosRoute
   '/app/seguros': typeof AppSegurosRoute
   '/app/': typeof AppIndexRoute
 }
@@ -95,18 +113,22 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/app/$section'
+    | '/app/facturacion'
     | '/app/ingreso'
     | '/app/kanban'
     | '/app/proformas'
+    | '/app/repuestos'
     | '/app/seguros'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/app/$section'
+    | '/app/facturacion'
     | '/app/ingreso'
     | '/app/kanban'
     | '/app/proformas'
+    | '/app/repuestos'
     | '/app/seguros'
     | '/app'
   id:
@@ -114,9 +136,11 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/app/$section'
+    | '/app/facturacion'
     | '/app/ingreso'
     | '/app/kanban'
     | '/app/proformas'
+    | '/app/repuestos'
     | '/app/seguros'
     | '/app/'
   fileRoutesById: FileRoutesById
@@ -156,6 +180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSectionRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/facturacion': {
+      id: '/app/facturacion'
+      path: '/facturacion'
+      fullPath: '/app/facturacion'
+      preLoaderRoute: typeof AppFacturacionRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/ingreso': {
       id: '/app/ingreso'
       path: '/ingreso'
@@ -177,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProformasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/repuestos': {
+      id: '/app/repuestos'
+      path: '/repuestos'
+      fullPath: '/app/repuestos'
+      preLoaderRoute: typeof AppRepuestosRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/seguros': {
       id: '/app/seguros'
       path: '/seguros'
@@ -189,18 +227,22 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppSectionRoute: typeof AppSectionRoute
+  AppFacturacionRoute: typeof AppFacturacionRoute
   AppIngresoRoute: typeof AppIngresoRoute
   AppKanbanRoute: typeof AppKanbanRoute
   AppProformasRoute: typeof AppProformasRoute
+  AppRepuestosRoute: typeof AppRepuestosRoute
   AppSegurosRoute: typeof AppSegurosRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppSectionRoute: AppSectionRoute,
+  AppFacturacionRoute: AppFacturacionRoute,
   AppIngresoRoute: AppIngresoRoute,
   AppKanbanRoute: AppKanbanRoute,
   AppProformasRoute: AppProformasRoute,
+  AppRepuestosRoute: AppRepuestosRoute,
   AppSegurosRoute: AppSegurosRoute,
   AppIndexRoute: AppIndexRoute,
 }
@@ -214,13 +256,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
