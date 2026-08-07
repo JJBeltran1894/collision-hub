@@ -68,7 +68,11 @@ export function DesktopShell({ children }: { children: ReactNode }) {
                   ? ({ to: "/app/proformas" } as const)
                   : item.section === "seguros"
                     ? ({ to: "/app/seguros" } as const)
-                    : ({ to: "/app/$section", params: { section: item.section } } as const);
+                    : item.section === "repuestos"
+                      ? ({ to: "/app/repuestos" } as const)
+                      : item.section === "facturacion"
+                        ? ({ to: "/app/facturacion" } as const)
+                        : ({ to: "/app/$section", params: { section: item.section } } as const);
             return (
               <Link
                 key={item.label}
