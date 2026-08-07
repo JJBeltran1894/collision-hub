@@ -10,9 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useSimulation } from "@/context/simulation";
+import { useSimulation, useBranchScope } from "@/context/simulation";
 import { CaseCard } from "@/components/kanban";
-import { isCommercialAlert, isStalled, money, stageOf } from "@/data/cases";
+import { isCommercialAlertDays, isStalledDays, money, currentStageDays, stageOf } from "@/data/cases";
 import { useCases } from "@/context/cases";
 import { cn } from "@/lib/utils";
 
@@ -38,12 +38,18 @@ export const Route = createFileRoute("/app/")({
 });
 
 function AppHome() {
-  const { session, viewMode } = useSimulation();
+  const { session, viewMode, scopeBranch } = useSimulation();
   const { cases } = useCases();
+  const items = useBranchScope(cases);
   if (!session) return null;
 
-  const items = cases.filter((c) => c.branch === session.branch);
-  const stalled = items.filter(isStalled);
+  const scopeLabel =
+    session.role === "Asesor"
+      ? session.branch
+      : scopeBranch === "todas"
+        ? "Todas las sucursales"
+        : scopeBranch;
+  const stalled = items.filter((c) => isStalledDays(currentStageDays(c)));
   const insurance = items.filter((i) => i.stage === "ajuste");
   const total = items.reduce((sum, i) => sum + i.amount, 0);
 
@@ -51,7 +57,7 @@ function AppHome() {
     return (
       <div className="space-y-4">
         <header>
-          <h1 className="text-[18px] font-bold text-slate-deep">Patio · {session.branch}</h1>
+          <h1 className="text-[18px] font-bold text-slate-deep">Patio · {scopeLabel}</h1>
           <p className="text-[12px] leading-4 text-muted-grey">
             {items.length} vehículos asignados · {stalled.length} con alerta
           </p>
@@ -76,7 +82,7 @@ function AppHome() {
       <header>
         <h1 className="text-[18px] font-bold text-slate-deep">Dashboard general</h1>
         <p className="text-[12px] leading-4 text-muted-grey">
-          Sucursal {session.branch} · Sesión de {session.role}
+          Sucursal {scopeLabel} · Sesión de {session.role}
         </p>
       </header>
 
@@ -130,6 +136,7 @@ function AppHome() {
             <TableBody>
               {items.map((item) => {
                 const stage = stageOf(item.stage);
+                const days = currentStageDays(item);
                 return (
                   <TableRow key={item.id}>
                     <TableCell className="text-[12px] font-bold">{item.id}</TableCell>
@@ -139,19 +146,19 @@ function AppHome() {
                     <TableCell className="text-[12px]">{item.insurer}</TableCell>
                     <TableCell className="text-[12px]">{stage.label}</TableCell>
                     <TableCell className="text-[12px]">
-                      {isStalled(item) ? (
+                      {isStalledDays(days) ? (
                         <Badge
                           className={cn(
                             "text-[11px] font-bold",
-                            isCommercialAlert(item)
+                            isCommercialAlertDays(item.stage, days)
                               ? "bg-crimson text-crimson-foreground"
                               : "bg-warning text-warning-foreground",
                           )}
                         >
-                          {item.daysInStage}
+                          {days}
                         </Badge>
                       ) : (
-                        item.daysInStage
+                        days
                       )}
                     </TableCell>
                     <TableCell className="text-right text-[12px] font-bold">

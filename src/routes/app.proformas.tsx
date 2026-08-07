@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { useSimulation } from "@/context/simulation";
+import { useSimulation, useBranchScope } from "@/context/simulation";
 import { useCases } from "@/context/cases";
 import {
   CATEGORIES,
@@ -59,7 +59,7 @@ function ProformasPage() {
   const { cases } = useCases();
   const { items, addItem, removeItem } = useProformas();
 
-  const branchCases = session ? cases.filter((c) => c.branch === session.branch) : [];
+  const branchCases = useBranchScope(cases);
   const [caseId, setCaseId] = useState(branchCases[0]?.id ?? "");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<ItemCategory>("Mano de Obra");

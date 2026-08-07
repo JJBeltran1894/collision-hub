@@ -23,8 +23,9 @@ import {
   STAGES,
   STAGE_STYLES,
   formatDate,
-  isCommercialAlert,
-  isStalled,
+  currentStageDays,
+  isCommercialAlertDays,
+  isStalledDays,
   money,
   stageOf,
   type StageKey,
@@ -96,8 +97,9 @@ export function CaseCard({
 }) {
   const stage = stageOf(item.stage);
   const styles = STAGE_STYLES[stage.tone];
-  const stalled = isStalled(item);
-  const commercial = isCommercialAlert(item);
+  const days = currentStageDays(item);
+  const stalled = isStalledDays(days);
+  const commercial = isCommercialAlertDays(item.stage, days);
   const { moveCase } = useCases();
 
   return (
@@ -146,7 +148,7 @@ export function CaseCard({
         <div className="flex justify-between gap-2">
           <dt>Días transcurridos</dt>
           <dd className={cn("font-bold", commercial ? "text-crimson" : "text-slate-deep")}>
-            {item.daysInStage}
+            {days}
           </dd>
         </div>
       </dl>
@@ -161,7 +163,7 @@ export function CaseCard({
         </Badge>
         {stalled && !commercial && (
           <Badge className="bg-warning text-[11px] font-bold text-warning-foreground">
-            Estancado · {item.daysInStage} días
+            Estancado · {days} días
           </Badge>
         )}
       </div>

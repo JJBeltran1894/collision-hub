@@ -2,8 +2,19 @@ import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { Monitor, Smartphone, LogOut, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { useSimulation } from "@/context/simulation";
+import {
+  useSimulation,
+  BRANCHES,
+  type BranchScope,
+} from "@/context/simulation";
 import { DesktopShell } from "@/components/desktop-shell";
 import { MobileShell } from "@/components/mobile-shell";
 import { SyncQueueProvider } from "@/context/sync-queue";
@@ -33,7 +44,8 @@ export const Route = createFileRoute("/app")({
 });
 
 function AppLayout() {
-  const { session, viewMode, setViewMode, signOut, hydrated } = useSimulation();
+  const { session, viewMode, setViewMode, signOut, hydrated, canScopeAny, scopeBranch, setScopeBranch } =
+    useSimulation();
 
   if (!hydrated) {
     return <div className="min-h-screen bg-office-bg" />;
@@ -69,9 +81,33 @@ function AppLayout() {
             <Badge variant="outline" className="border-current text-[11px] font-bold">
               {session.role}
             </Badge>
-            <Badge className="bg-insurance text-[11px] font-bold text-insurance-foreground">
-              {session.branch}
-            </Badge>
+            {canScopeAny ? (
+              <Select
+                value={scopeBranch}
+                onValueChange={(v) => setScopeBranch(v as BranchScope)}
+              >
+                <SelectTrigger
+                  className="h-7 border-transparent bg-background/10 px-2 text-[11px] font-bold text-slate-deep-foreground focus:bg-background/20"
+                  aria-label="Sucursal visible"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas" className="text-[12px]">
+                    Todas las sucursales
+                  </SelectItem>
+                  {BRANCHES.map((b) => (
+                    <SelectItem key={b} value={b} className="text-[12px]">
+                      {b}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Badge className="bg-insurance text-[11px] font-bold text-insurance-foreground">
+                {session.branch}
+              </Badge>
+            )}
           </div>
 
           <div

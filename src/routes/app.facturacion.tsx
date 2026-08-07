@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { useSimulation } from "@/context/simulation";
+import { useSimulation, useBranchScope } from "@/context/simulation";
 import { useCases } from "@/context/cases";
 import { entryFor, useProformas } from "@/context/proformas";
 import { usePurchasing, type InvoiceLine } from "@/context/purchasing";
@@ -57,7 +57,7 @@ function FacturacionPage() {
   const { items, adjustments } = useProformas();
   const { invoices, addInvoice } = usePurchasing();
 
-  const branchCases = session ? cases.filter((c) => c.branch === session.branch) : [];
+  const branchCases = useBranchScope(cases);
   const [caseId, setCaseId] = useState(
     branchCases.find((c) => (items[c.id] ?? []).length > 0)?.id ?? branchCases[0]?.id ?? "",
   );
@@ -155,7 +155,12 @@ function FacturacionPage() {
   };
 
   const caseInvoices = invoices.filter((i) => i.caseId === activeId);
-  const canEmit = totals.subtotal > 0 && taxId.trim().length >= 10 && name.trim().length > 0;
+  const readyToBill = current.stage === "salida";
+  const canEmit =
+    readyToBill &&
+    totals.subtotal > 0 &&
+    taxId.trim().length >= 10 &&
+    name.trim().length > 0;
 
   return (
     <div className="space-y-5">
@@ -271,6 +276,11 @@ function FacturacionPage() {
               <ReceiptText className="size-4" />
               Emitir factura electrónica
             </Button>
+            <p className="text-[11px] leading-4 text-muted-grey">
+              {totals.subtotal > 0 && !readyToBill
+                ? `La OT debe estar en la etapa "Listo / Salida" para emitirse.`
+                : "La factura se consolida sobre el valor neto aprobado y se autoriza tras la salida del vehículo."}
+            </p>
           </CardContent>
         </Card>
 

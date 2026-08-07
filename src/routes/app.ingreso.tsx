@@ -29,8 +29,11 @@ import type { ZoneDamage } from "@/components/intake/vehicle-diagram";
 import { SyncPanel } from "@/components/intake/sync-panel";
 import { useSyncQueue } from "@/context/sync-queue";
 import { useSimulation } from "@/context/simulation";
+import { useCases } from "@/context/cases";
 import {
   ACCESSORIES,
+  ANT_COLORS,
+  BODY_CONDITIONS,
   BROKERS,
   CLIENTS,
   INSURERS,
@@ -42,7 +45,8 @@ import {
   ZONE_LABELS,
   findPlate,
 } from "@/data/intake";
-import type { AccessoryAnswer, Severity, ZoneKey } from "@/data/intake";
+import type { AccessoryAnswer, BodyCondition, Severity, ZoneKey } from "@/data/intake";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/ingreso")({
@@ -75,6 +79,7 @@ const initialAccessories: AccessoryState = Object.fromEntries(
 function IngresoPage() {
   const { session } = useSimulation();
   const { enqueue } = useSyncQueue();
+  const { addCase } = useCases();
 
   const [plate, setPlate] = useState("");
   const [brand, setBrand] = useState("");
@@ -82,6 +87,11 @@ function IngresoPage() {
   const [year, setYear] = useState("");
   const [color, setColor] = useState("");
   const [autofilled, setAutofilled] = useState(false);
+
+  const [kilometraje, setKilometraje] = useState("");
+  const [bodyCondition, setBodyCondition] = useState<BodyCondition>("Buena");
+  const [interiorCondition, setInteriorCondition] = useState<BodyCondition>("Buena");
+  const [observaciones, setObservaciones] = useState("");
 
   const [client, setClient] = useState("");
   const [insurer, setInsurer] = useState("");
@@ -140,6 +150,8 @@ function IngresoPage() {
     const list: string[] = [];
     if (!plate.trim()) list.push("Placa requerida");
     if (!brand || !model || !year) list.push("Datos del vehículo incompletos");
+    if (!color) list.push("Selecciona el color (catálogo ANT)");
+    if (!kilometraje) list.push("Kilometraje requerido");
     if (!client) list.push("Cliente propietario requerido");
     if (!insurer) list.push("Aseguradora requerida");
     if (!broker) list.push("Broker requerido");
@@ -147,7 +159,7 @@ function IngresoPage() {
       list.push("Checklist de accesorios incompleto");
     if (!mediaOk) list.push(`Mínimo ${MIN_PHOTOS} fotos y ${MIN_VIDEOS} videos`);
     return list;
-  }, [plate, brand, model, year, client, insurer, broker, accessories, mediaOk]);
+  }, [plate, brand, model, year, color, kilometraje, client, insurer, broker, accessories, mediaOk]);
 
   const submit = () => {
     if (errors.length > 0) {
@@ -161,12 +173,26 @@ function IngresoPage() {
       videos,
       zones: zoneCount,
     });
-    toast.success("Ingreso guardado en la cola local del dispositivo");
+    const otId = addCase({
+      plate: plate.trim().toUpperCase(),
+      vehicle: [brand, model, year].filter(Boolean).join(" ") || "Vehículo sin catalogar",
+      client,
+      insurer,
+      color,
+      broker,
+      advisor: session?.name ?? "Asesor",
+      branch: session?.branch ?? "Quito Norte",
+    });
+    toast.success(`Ingreso ${otId} guardado y creado en Recepción`);
     setPlate("");
     setBrand("");
     setModel("");
     setYear("");
     setColor("");
+    setKilometraje("");
+    setBodyCondition("Buena");
+    setInteriorCondition("Buena");
+    setObservaciones("");
     setAutofilled(false);
     setClient("");
     setInsurer("");
@@ -230,12 +256,89 @@ function IngresoPage() {
             <Field label="Marca" value={brand} onChange={setBrand} />
             <Field label="Modelo" value={model} onChange={setModel} />
             <Field label="Año" value={year} onChange={setYear} />
-            <Field label="Color" value={color} onChange={setColor} />
+            <Field label="Kilometraje" value={kilometraje} onChange={setKilometraje} />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[12px] font-bold">Color (catálogo ANT)</Label>
+            <Select value={color} onValueChange={setColor}>
+              <SelectTrigger className="min-h-[48px] text-[13px]">
+                <SelectValue placeholder="Selecciona el color autorizado" />
+              </SelectTrigger>
+              <SelectContent>
+                {ANT_COLORS.map((c) => (
+                  <SelectItem key={c} value={c} className="text-[13px]">
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] leading-4 text-muted-grey">
+              Color regulado por la ANT: solo se permite seleccionar de este catálogo.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[12px] font-bold">Observaciones generales</Label>
+            <Textarea
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+              placeholder="Detalles del estado de llegada, daños previos, condiciones pactadas..."
+              className="min-h-[80px] text-[13px]"
+            />
           </div>
 
           <PickField label="Cliente propietario" value={client} onChange={setClient} options={CLIENTS} />
           <PickField label="Aseguradora" value={insurer} onChange={setInsurer} options={INSURERS} />
           <PickField label="Broker" value={broker} onChange={setBroker} options={BROKERS} />
+        </CardContent>
+      </Card>
+
+      {/* 1b. Ficha técnica */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-[14px] font-bold text-slate-deep">
+            <ClipboardCheck className="size-4 text-insurance" />
+            Ficha técnica de estado
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-[12px] font-bold">Estado de la carrocería (exterior)</Label>
+            <Select
+              value={bodyCondition}
+              onValueChange={(v) => setBodyCondition(v as BodyCondition)}
+            >
+              <SelectTrigger className="min-h-[48px] text-[13px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {BODY_CONDITIONS.map((c) => (
+                  <SelectItem key={c} value={c} className="text-[13px]">
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-[12px] font-bold">Estado del interior</Label>
+            <Select
+              value={interiorCondition}
+              onValueChange={(v) => setInteriorCondition(v as BodyCondition)}
+            >
+              <SelectTrigger className="min-h-[48px] text-[13px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {BODY_CONDITIONS.map((c) => (
+                  <SelectItem key={c} value={c} className="text-[13px]">
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Construction } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { ReportsModule } from "@/components/reports";
 
 const TITLES: Record<string, string> = {
   proformas: "Proformas",
@@ -36,6 +37,10 @@ export const Route = createFileRoute("/app/$section")({
 function SectionPage() {
   const { section } = Route.useParams();
   const title = TITLES[section] ?? "Módulo";
+
+  if (section === "reportes") {
+    return <ReportsModule />;
+  }
 
   return (
     <div className="space-y-5">

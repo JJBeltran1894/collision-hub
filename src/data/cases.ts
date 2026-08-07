@@ -57,6 +57,8 @@ export type VehicleCase = {
   vehicle: string;
   client: string;
   insurer: string;
+  color: string;
+  broker: string;
   stage: StageKey;
   daysInStage: number;
   amount: number;
@@ -97,6 +99,8 @@ const SEEDS: Seed[] = [
     vehicle: "Chevrolet Sail 2021",
     client: "María Zambrano",
     insurer: "Seguros Alianza",
+    color: "Blanco",
+    broker: "Novaequity Brokers",
     stage: "recepcion",
     daysInStage: 2,
     amount: 1240.5,
@@ -109,6 +113,8 @@ const SEEDS: Seed[] = [
     vehicle: "Kia Sportage 2022",
     client: "Andrés Vera",
     insurer: "Particular",
+    color: "Negro",
+    broker: "Tecniseguros",
     stage: "proforma",
     daysInStage: 4,
     amount: 3890.0,
@@ -121,6 +127,8 @@ const SEEDS: Seed[] = [
     vehicle: "Toyota Hilux 2019",
     client: "Comercial Andina S.A.",
     insurer: "Seguros Alianza",
+    color: "Plata",
+    broker: "Novaequity Brokers",
     stage: "ajuste",
     daysInStage: 118,
     amount: 7420.35,
@@ -134,6 +142,8 @@ const SEEDS: Seed[] = [
     vehicle: "Mazda 3 2020",
     client: "Jorge Salgado",
     insurer: "Equinoccial",
+    color: "Rojo",
+    broker: "Ecuaprimas",
     stage: "enderezado",
     daysInStage: 6,
     amount: 2560.0,
@@ -146,6 +156,8 @@ const SEEDS: Seed[] = [
     vehicle: "Hyundai Tucson 2023",
     client: "Patricia Ríos",
     insurer: "Seguros Alianza",
+    color: "Azul",
+    broker: "Novaequity Brokers",
     stage: "repuestos",
     daysInStage: 21,
     amount: 5130.9,
@@ -158,6 +170,8 @@ const SEEDS: Seed[] = [
     vehicle: "Nissan Versa 2018",
     client: "Fernando Ochoa",
     insurer: "Particular",
+    color: "Beige",
+    broker: "Sin broker",
     stage: "salida",
     daysInStage: 1,
     amount: 980.75,
@@ -170,6 +184,8 @@ const SEEDS: Seed[] = [
     vehicle: "Renault Duster 2021",
     client: "Silvia Cabrera",
     insurer: "Equinoccial",
+    color: "Gris",
+    broker: "Novaequity Brokers",
     stage: "proforma",
     daysInStage: 46,
     amount: 1710.2,
@@ -183,6 +199,8 @@ const SEEDS: Seed[] = [
     vehicle: "Ford Ranger 2020",
     client: "Transporte Litoral Cía.",
     insurer: "Seguros Alianza",
+    color: "Blanco",
+    broker: "Ecuaprimas",
     stage: "pintura",
     daysInStage: 16,
     amount: 8890.0,
@@ -195,6 +213,8 @@ const SEEDS: Seed[] = [
     vehicle: "Suzuki Vitara 2022",
     client: "Lucía Herrera",
     insurer: "Equinoccial",
+    color: "Gris",
+    broker: "Tecniseguros",
     stage: "orden",
     daysInStage: 5,
     amount: 3320.4,
@@ -213,8 +233,22 @@ export const STALLED_THRESHOLD_DAYS = 15;
 export const COMMERCIAL_ALERT_DAYS = 30;
 export const COMMERCIAL_ALERT_STAGES: StageKey[] = ["proforma", "ajuste"];
 
+/** Días reales transcurridos en la etapa actual, calculados desde la bitácora. */
+export const currentStageDays = (c: VehicleCase) => {
+  const open =
+    c.history.find((h) => h.endedAt === null) ?? c.history[c.history.length - 1]!;
+  return daysBetween(open.startedAt, null);
+};
+
+export const isStalledDays = (days: number) => days > STALLED_THRESHOLD_DAYS;
+
+export const isCommercialAlertDays = (stage: StageKey, days: number) =>
+  COMMERCIAL_ALERT_STAGES.includes(stage) && days > COMMERCIAL_ALERT_DAYS;
+
+/** @deprecated Usa currentStageDays + isStalledDays para reflejar tiempos en vivo. */
 export const isStalled = (c: VehicleCase) => c.daysInStage > STALLED_THRESHOLD_DAYS;
 
+/** @deprecated Usa currentStageDays + isCommercialAlertDays para reflejar tiempos en vivo. */
 export const isCommercialAlert = (c: VehicleCase) =>
   COMMERCIAL_ALERT_STAGES.includes(c.stage) && c.daysInStage > COMMERCIAL_ALERT_DAYS;
 

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, TrendingDown } from "lucide-react";
+import { ArrowRight, FilePlus2, Paperclip, Trash2, TrendingDown } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,8 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { useSimulation } from "@/context/simulation";
+import { useSimulation, useBranchScope } from "@/context/simulation";
 import { useCases } from "@/context/cases";
+import { usePurchasing } from "@/context/purchasing";
 import {
   approvedTotal,
   entryFor,
@@ -50,10 +53,11 @@ const STATUSES: AdjustStatus[] = ["pendiente", "aprobado", "modificado", "rechaz
 
 function SegurosPage() {
   const { session } = useSimulation();
-  const { cases } = useCases();
+  const { cases, moveCase } = useCases();
   const { items, adjustments, setAdjust } = useProformas();
+  const { attachments, addAttachment, removeAttachment } = usePurchasing();
 
-  const branchCases = session ? cases.filter((c) => c.branch === session.branch) : [];
+  const branchCases = useBranchScope(cases);
   const [caseId, setCaseId] = useState(
     branchCases.find((c) => (items[c.id] ?? []).length > 0)?.id ?? branchCases[0]?.id ?? "",
   );
@@ -69,6 +73,29 @@ function SegurosPage() {
   const approved = approvedTotal(list, adjust);
   const discount = original > 0 ? ((original - approved) / original) * 100 : 0;
 
+  const caseAttachments = attachments.filter((a) => a.caseId === activeId);
+  const allSettled =
+    list.length > 0 && list.every((i) => (adjust?.[i.id]?.status ?? "pendiente") !== "pendiente");
+  const canGenerate = current?.stage === "ajuste" && allSettled;
+
+  const generateOt = () => {
+    if (!current) return;
+    moveCase(current.id, "orden");
+    toast.success(`Orden de Reparación generada para la placa ${current.plate}`);
+  };
+
+  const onAddFiles = (files: FileList | null) => {
+    if (!files || files.length === 0 || !activeId) return;
+    Array.from(files).forEach((f) => {
+      const kind = f.name.split(".").pop()?.toUpperCase() ?? "ARCHIVO";
+      const size =
+        f.size >= 1024 * 1024
+          ? `${(f.size / (1024 * 1024)).toFixed(1)} MB`
+          : `${Math.round(f.size / 1024)} KB`;
+      addAttachment(activeId, { name: f.name, kind, size });
+    });
+  };
+
   return (
     <div className="space-y-5">
       <header>
@@ -77,6 +104,72 @@ function SegurosPage() {
           La proforma original permanece intacta; el ajuste es un documento independiente.
         </p>
       </header>
+
+      {canGenerate && (
+        <Card className="border-l-4 border-l-accent-blue">
+          <CardContent className="flex flex-wrap items-center gap-3 p-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-bold text-slate-deep">
+                Ajuste completo: listo para generar la orden de reparación
+              </p>
+              <p className="text-[12px] text-muted-grey">
+                Todos los ítems tienen estado definido. Al generar la OT se crea la orden
+                aprobada y el caso avanza a la etapa Orden.
+              </p>
+            </div>
+            <Button onClick={generateOt} className="h-11 gap-2 text-[12px] font-bold">
+              <FilePlus2 className="size-4" />
+              Generar Orden de Reparación
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-[14px] font-bold text-slate-deep">
+            <Paperclip className="size-4 text-insurance" />
+            Archivos de respaldo de la OT
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border text-[12px] font-bold text-muted-grey hover:bg-muted">
+            <Paperclip className="size-4" />
+            Adjuntar correos, PDF del seguro, Excel de respaldo (varios)
+            <input
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => onAddFiles(e.target.files)}
+            />
+          </label>
+          {caseAttachments.length === 0 && (
+            <p className="py-3 text-center text-[12px] text-muted-grey">
+              Sin archivos adjuntos. Sin límite de cantidad de respaldo por OT.
+            </p>
+          )}
+          {caseAttachments.map((f) => (
+            <div
+              key={f.id}
+              className="flex items-center gap-2 rounded-md border border-border p-2 text-[12px]"
+            >
+              <span className="min-w-0 flex-1 truncate font-bold text-slate-deep">{f.name}</span>
+              <Badge variant="outline" className="text-[10px] font-bold">
+                {f.kind}
+              </Badge>
+              <span className="text-muted-grey">{f.size}</span>
+              <button
+                type="button"
+                aria-label={`Eliminar ${f.name}`}
+                onClick={() => removeAttachment(activeId, f.id)}
+                className="grid size-7 place-items-center rounded text-crimson hover:bg-muted"
+              >
+                <Trash2 className="size-4" />
+              </button>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="flex flex-wrap items-center gap-3 p-4">

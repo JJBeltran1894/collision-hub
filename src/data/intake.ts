@@ -97,3 +97,33 @@ export const MIN_PHOTOS = 10;
 export const MAX_PHOTOS = 15;
 export const MIN_VIDEOS = 2;
 export const MAX_VIDEOS = 3;
+
+/** Estado general de la carrocería e interior (ficha técnica de ingreso). */
+export type BodyCondition = "Buena" | "Regular" | "Dañada";
+export const BODY_CONDITIONS: BodyCondition[] = ["Buena", "Regular", "Dañada"];
+
+/** Colores autorizados por la ANT (Agencia Nacional de Tránsito, Ecuador).
+ * El registro de color del vehículo está restringido por disposición legal; por
+ * eso el color debe seleccionarse de este catálogo y no escribirse libremente. */
+export const ANT_COLORS: string[] = [
+  "Blanco",
+  "Plata",
+  "Negro",
+  "Gris",
+  "Rojo",
+  "Azul",
+  "Celeste",
+  "Verde",
+  "Amarillo",
+  "Naranja",
+  "Rosado",
+  "Morado",
+  "Beige",
+  "Crema",
+  "Dorado",
+  "Café",
+  "Vino",
+  "Turquesa",
+  "Fucsia",
+  "Bronce",
+];
